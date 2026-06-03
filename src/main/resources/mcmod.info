@@ -1,0 +1,15 @@
+[
+  {
+    "modid": "droptweaks",
+    "name": "DropTweaks",
+    "description": "Hold Q while hovering over a stack to drop it rapidly (Forge 1.8.9).",
+    "version": "1.0",
+    "authorList": ["You"],
+    "credits": "",
+    "logoFile": "",
+    "url": "",
+    "updateUrl": "",
+    "screenshots": [],
+    "dependencies": []
+  }
+]
