@@ -2,12 +2,12 @@
   {
     "modid": "droptweaks",
     "name": "DropTweaks",
-    "description": "Hold Q while hovering over a stack to drop it rapidly (Forge 1.8.9).",
+    "description": "A minecraft mod for forge 1.8.9 that backports modern drop mechanics and one QOL feature.",
     "version": "1.0",
-    "authorList": ["You"],
-    "credits": "",
+    "authorList": ["Novaski"],
+    "credits": "Novaski",
     "logoFile": "",
-    "url": "",
+    "url": "https://github.com/Novaski32/DropTweaks/",
     "updateUrl": "",
     "screenshots": [],
     "dependencies": []
