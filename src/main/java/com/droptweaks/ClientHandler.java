@@ -12,35 +12,63 @@ import org.lwjgl.input.Keyboard;
 
 @SideOnly(Side.CLIENT)
 public class ClientHandler {
+    private static final int DOUBLE_CLICK_THRESHOLD_MS = 250;
+
     private final Minecraft mc = Minecraft.getMinecraft();
+    private boolean prevQDown;
+    private int qClickCount;
+    private long lastQPressTime;
 
     @SubscribeEvent
     public void onClientTick(ClientTickEvent event) {
-        if (Keyboard.isKeyDown(Keyboard.KEY_Q)) {
-            if (mc.currentScreen instanceof GuiContainer) {
-                GuiContainer gui = (GuiContainer) mc.currentScreen;
-                Slot hovered = getHoveredSlot(gui);
-                if (hovered != null && hovered.getHasStack()) {
-                    try {
-                        int windowId = gui.inventorySlots.windowId;
-                        int slotId = hovered.slotNumber;
-                        mc.playerController.windowClick(windowId, slotId, 1, 4, mc.thePlayer);
-                    } catch (Throwable t) {
-                        // ignore
-                    }
-                }
+        boolean qDown = Keyboard.isKeyDown(Keyboard.KEY_Q);
+        boolean newPress = qDown && !prevQDown;
+        long now = System.currentTimeMillis();
+
+        if (newPress) {
+            if (qClickCount == 1 && now - lastQPressTime <= DOUBLE_CLICK_THRESHOLD_MS) {
+                qClickCount = 2;
             } else {
-                ItemStack item = mc.thePlayer.inventory.getCurrentItem();
-                if (item != null) {
-                    try {
-                        int windowId = mc.thePlayer.openContainer.windowId;
-                        int slotId = mc.thePlayer.inventory.currentItem + 36;
-                        mc.playerController.windowClick(windowId, slotId, 1, 4, mc.thePlayer);
-                    } catch (Throwable t) {
-                        // ignore
-                    }
-                }
+                qClickCount = 1;
             }
+            lastQPressTime = now;
+        } else if (!qDown && qClickCount != 0 && now - lastQPressTime > DOUBLE_CLICK_THRESHOLD_MS) {
+            qClickCount = 0;
+        }
+
+        if (qDown) {
+            if (newPress && qClickCount == 2) {
+                dropCurrentSlot(true);
+            } else if (qClickCount != 2) {
+                dropCurrentSlot(false);
+            }
+        }
+
+        prevQDown = qDown;
+    }
+
+    private void dropCurrentSlot(boolean dropAll) {
+        if (mc.currentScreen instanceof GuiContainer) {
+            GuiContainer gui = (GuiContainer) mc.currentScreen;
+            Slot hovered = getHoveredSlot(gui);
+            if (hovered != null && hovered.getHasStack()) {
+                clickSlot(gui.inventorySlots.windowId, hovered.slotNumber, dropAll ? 1 : 0);
+            }
+        } else {
+            ItemStack item = mc.thePlayer.inventory.getCurrentItem();
+            if (item != null) {
+                int windowId = mc.thePlayer.openContainer.windowId;
+                int slotId = mc.thePlayer.inventory.currentItem + 36;
+                clickSlot(windowId, slotId, dropAll ? 1 : 0);
+            }
+        }
+    }
+
+    private void clickSlot(int windowId, int slotId, int button) {
+        try {
+            mc.playerController.windowClick(windowId, slotId, button, 4, mc.thePlayer);
+        } catch (Throwable t) {
+            // ignore
         }
     }
 
